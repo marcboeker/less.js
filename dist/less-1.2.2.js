@@ -1627,6 +1627,19 @@ tree.functions = {
     },
     _isa: function (n, Type) {
         return (n instanceof Type) ? tree.True : tree.False;
+    },
+    "inline-image": function(ctx) {
+        return {
+            toCSS: function() {
+                var fs = require('fs');
+                var sys = require('util');
+
+                var chunks = ctx.value.split('.');
+                var mimetype = 'image/' + chunks[chunks.length - 1];
+
+                return 'url("data:' + mimetype + ';base64,' + new Buffer(fs.readFileSync(ctx.value)).toString('base64') + '")';
+            }
+        }
     }
 };
 
@@ -2624,14 +2637,14 @@ tree.Ruleset.prototype = {
         env.frames.unshift(ruleset);
 
         // Evaluate imports
-        if (ruleset.root || ruleset.allowImports) {
+        // if (ruleset.root || ruleset.allowImports) {
             for (var i = 0; i < ruleset.rules.length; i++) {
                 if (ruleset.rules[i] instanceof tree.Import) {
                     Array.prototype.splice
                          .apply(ruleset.rules, [i, 1].concat(ruleset.rules[i].eval(env)));
                 }
             }
-        }
+        // }
 
         // Store the frames around mixin definitions,
         // so they can be evaluated like closures when the time comes.
